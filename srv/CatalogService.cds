@@ -4,10 +4,15 @@ using { cappo.cds } from '../db/CDSViews';
 
 
 
-service CatalogService @(path: 'CatalogService') {
+service CatalogService @(path: 'CatalogService', requires: 'authenticated-user') {
     //demo
-    entity EmployeeSet as projection on master.employees;
+    entity EmployeeSet @(restrict: [
+                        { grant: ['READ'], to: 'Viewer', where: 'bankName = $user.BankName' },
+                        { grant: ['WRITE'], to: 'Admin' }
+                        ])
+                        as projection on master.employees;
     entity AddressSet as projection on master.address;
+   
     function getOrderDefault() returns POs;
     entity POs @(odata.draft.enabled: true,
                  Common.DefaultValuesFunction: 'getOrderDefault' ) as projection on transaction.purchaseorder{
@@ -41,7 +46,7 @@ service CatalogService @(path: 'CatalogService') {
 
 
     //entity ProdItems as projection on cds.CDSViews.ItemView;
-    //entity ProductSet as projection on cds.CDSViews.ProductView;
+    // entity ProductSet as projection on cds.CDSViews.ProductView;
 
 
 }
